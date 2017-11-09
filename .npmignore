@@ -1,5 +1,6 @@
 *.ts
 .git/
+examples/
 .gitignore
 tsconfig.json
 *.ts

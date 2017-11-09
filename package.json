@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/Cooya/TaskManager#readme",
   "dependencies": {
-    "@coya/services": "^1.0.0",
-    "@types/node": "^7.0.46"
+    "@coya/services": "^1.0.2"
   },
   "devDependencies": {
+    "@types/node": "^8.0.50",
     "typescript": "^2.6.1"
   }
 }
