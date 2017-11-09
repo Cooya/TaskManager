@@ -1,14 +1,16 @@
 import * as Logs from '@coya/services/logs';
 
-export abstract class Task {
+export class Task {
 	private name: string;
 	private timeInterval: number;
 	private nextExecutionTime: number;
+	public run: Function;
 
-	constructor(name: string, timeInterval = 60) {
+	constructor(name: string, timeInterval: number, runFunction: Function) {
 		this.name = name;
 		this.timeInterval = timeInterval;
 		this.nextExecutionTime = 0;
+		this.run = runFunction;
 	}
 
 	public getName() {
@@ -26,8 +28,6 @@ export abstract class Task {
 	public setNextExecutionTime(time: number) {
 		this.nextExecutionTime = time;
 	}
-
-	abstract run(): Promise<any>;
 }
 
 export class TaskManager {
