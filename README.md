@@ -29,6 +29,7 @@ taskManager.processAsynchronousTasks([firstTask, secondTask])
     taskManager.getLogs().info('Task manager stopped.');
 }, function(error) {
     taskManager.getLogs().error(error);
+    process.exit(1); // cancel all other scheduled tasks
 });
 ```
 
