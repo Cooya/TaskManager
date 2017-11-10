@@ -11,17 +11,15 @@ npm install @coya/task-manager
 ```javascript
 const { TaskManager, Task } = require('@coya/task-manager');
 
-const firstTask = new Task('firstTask', 10); // processed every 10 seconds
-firstTask.run = function() {
+const firstTask = new Task('firstTask', 10, function() { // processed every 10 seconds
     console.log('hello');
     return Promise.resolve();
-};
+});
 
-const secondTask = new Task('secondTask', 5); // processed every 5 seconds
-secondTask.run = function() {
+const secondTask = new Task('secondTask', 5, function() { // processed every 5 seconds
     console.log('hola');
     return Promise.resolve();
-};
+});
 
 const taskManager = new TaskManager();
 taskManager.processAsynchronousTasks([firstTask, secondTask])
@@ -57,4 +55,4 @@ taskList  | array<Task> | list of objects implementing or inheriting the Task cl
 The Task class, and so its constructor, contains three fields :
 * name => name of the task
 * timeInterval => interval in seconds between each task execution
-* runFunction => task function called by the scheduler, it must return a promise
+* runFunction => task function called by the scheduler, it must return a promise (this function can be passed to the Task constructor or be a member method of the inheriting class)
