@@ -2,7 +2,7 @@
   "name": "@coya/task-manager",
   "version": "0.0.1",
   "description": "Scheduler for run tasks successively or simultaneously",
-  "main": "app/TaskManager.js",
+  "main": "js/TaskManager.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
