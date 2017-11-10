@@ -1,6 +1,6 @@
 {
   "name": "@coya/task-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Scheduler for run tasks successively or simultaneously",
   "main": "js/TaskManager.js",
   "scripts": {
