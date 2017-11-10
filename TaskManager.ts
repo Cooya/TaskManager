@@ -10,7 +10,7 @@ export class Task {
 		this.name = name;
 		this.timeInterval = timeInterval;
 		this.nextExecutionTime = 0;
-		this.run = runFunction;
+		if(runFunction) this.run = runFunction;
 	}
 
 	public getName() {
