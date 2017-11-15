@@ -1,4 +1,4 @@
-import * as Logs from '@coya/services/logs';
+import * as Logs from '@coya/logs';
 
 export class Task {
 	private name: string;
