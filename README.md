@@ -7,6 +7,15 @@ Scheduler for run tasks successively or simultaneously.
 npm install @coya/task-manager
 ```
 
+## Build (for dev)
+```
+git clone https://github.com/Cooya/TaskManager
+cd TaskManager
+npm install // it will also install the development dependencies
+npm run build
+npm run example // run the example script in "examples" folder
+```
+
 ## Usage examples
 ```javascript
 const { TaskManager, Task } = require('@coya/task-manager');
