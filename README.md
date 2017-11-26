@@ -20,24 +20,26 @@ npm run example // run the example script in "examples" folder
 ```javascript
 const { TaskManager, Task } = require('@coya/task-manager');
 
-const firstTask = new Task('firstTask', 10, function() { // processed every 10 seconds
-    console.log('hello');
-    return Promise.resolve();
+const firstTask = new Task('firstTask', 10, function() {
+	console.log('hello');
+	return Promise.resolve();
 });
 
-const secondTask = new Task('secondTask', 5, function() { // processed every 5 seconds
-    console.log('hola');
-    return Promise.resolve();
+const secondTask = new Task('secondTask', 5, function() {
+	console.log('hola');
+	return Promise.resolve();
+});
+
+const thirdTask = new Task('thirdTask', 2, function() {
+	console.log('failure');
+	return Promise.reject();
 });
 
 const taskManager = new TaskManager();
-taskManager.processAsynchronousTasks([firstTask, secondTask])
-.then(function() {
-    taskManager.getLogs().info('Task manager stopped.');
-}, function(error) {
-    taskManager.getLogs().error(error);
-    process.exit(1); // cancel all other scheduled tasks
+taskManager.end(function() {
+	console.log('All tasks have been stopped, task manager shutted down.');
 });
+taskManager.processAsynchronousTasks([firstTask, secondTask, thirdTask]);
 ```
 
 ## Methods
@@ -64,4 +66,5 @@ taskList  | array<Task> | list of objects implementing or inheriting the Task cl
 The Task class, and so its constructor, contains three fields :
 * name => name of the task
 * timeInterval => interval in seconds between each task execution
-* runFunction => task function called by the scheduler, it must return a promise (this function can be passed to the Task constructor or be a member method of the inheriting class)
+* maxFailuresInARow (optional) => determine the number of failures in a row before the task will be taken out of the task list (default it is 5) 
+* run => task function called by the scheduler, it must return a promise (this function can be passed to the Task constructor or be a member method of the inheriting class)
