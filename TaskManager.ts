@@ -90,6 +90,8 @@ export class TaskManager {
 		this._end = end;
 	}
 
+	/*** SYNCHRONOUS SECTION ***/
+
 	public processSynchronousTasks(tasks?: Array<Task>) {
 		if(tasks) this.tasks = tasks;
 		if(!this.tasks.length)
