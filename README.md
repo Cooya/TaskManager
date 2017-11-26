@@ -21,23 +21,23 @@ npm run example // run the example script in "examples" folder
 const { TaskManager, Task } = require('@coya/task-manager');
 
 const firstTask = new Task('firstTask', 10, function() {
-	console.log('hello');
-	return Promise.resolve();
+    console.log('hello');
+    return Promise.resolve();
 });
 
 const secondTask = new Task('secondTask', 5, function() {
-	console.log('hola');
-	return Promise.resolve();
+    console.log('hola');
+    return Promise.resolve();
 });
 
 const thirdTask = new Task('thirdTask', 2, function() {
-	console.log('failure');
-	return Promise.reject();
+    console.log('failure');
+    return Promise.reject();
 });
 
 const taskManager = new TaskManager();
 taskManager.end(function() {
-	console.log('All tasks have been stopped, task manager shutted down.');
+    console.log('All tasks have been stopped, task manager shutted down.');
 });
 taskManager.processAsynchronousTasks([firstTask, secondTask, thirdTask]);
 ```
