@@ -166,13 +166,11 @@ export class TaskManager {
 			if(result && result.stop) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
 				this.logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
-				if(this._tasks.length == 0)
+				if(!this._tasks.length)
 					this.endTaskManager();
 			}
-			else if(result && result.stopAll) {
-				this.cancelAllTasks();
+			else if(result && result.stopAll)
 				this.endTaskManager();
-			}
 			else
 				this.scheduleTask(task);
 		})
@@ -181,13 +179,11 @@ export class TaskManager {
 			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
 				this.logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
-				if(this._tasks.length == 0)
-					this.endTaskManager();
+				if(!this._tasks.length)
+					this.endTaskManager(true);
 			}
-			else if(error && error.stopAll) {
-				this.cancelAllTasks(true);
-				this.endTaskManager();
-			}
+			else if(error && error.stopAll)
+				this.endTaskManager(true);
 			else
 				this.scheduleTask(task);
 		});
@@ -200,18 +196,17 @@ export class TaskManager {
 		this.logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
 	}
 
-	private endTaskManager() {
+	private endTaskManager(isError?: boolean) {
 		if(!this._isEnded) { // this allows to not call multiple times the end function if several tasks are running at the same time 
 			this._isEnded = true;
+			if(this._tasks.length) {
+				this._tasks.forEach((task) => {
+					task.cancel();
+				});
+				this._tasks = [];
+				(isError ? this.logs.error: this.logs.info).call(this, 'All tasks have been cancelled and removed from the tasks list.');
+			}
 			if(this._end) this._end();
 		}
-	}
-
-	private cancelAllTasks(isError?: boolean) {
-		this._tasks.forEach((task) => {
-			task.cancel();
-		});
-		this._tasks = [];
-		(isError ? this.logs.error : this.logs.info)('All tasks have been cancelled and removed from the tasks list.');
 	}
 }
