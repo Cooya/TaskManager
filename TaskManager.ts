@@ -168,42 +168,41 @@ export class TaskManager {
 					end();
 			}
 			else if(result && result.stopAll) {
-				this.tasks.forEach((task) => {
-					task.cancel();
-				});
-				this.tasks = [];
-				this.logs.info('All tasks have been stopped and removed from the tasks list.');
+				this.cancelAllTasks();
 				end();
 			}
-			else {
-				const nextExecutionTime = task.timeInterval * 1000;
-				task.nextExecutionTime = nextExecutionTime; // useless actually
-				task.timeout = setTimeout(this.taskLoop.bind(this, task, end), nextExecutionTime);
-				this.logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
-			}
+			else
+				this.scheduleTask(task);
 		})
 		.catch((error) => {
 			task.incExecutionCounter(true);
 			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow) {
 				this.tasks.splice(this.tasks.indexOf(task), 1);
-				this.logs.error('Task "' + task.name + '" removed from the tasks list.');
+				this.logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
 				if(this.tasks.length == 0)
 					end();
 			}
 			else if(error && error.stopAll) {
-				this.tasks.forEach((task) => {
-					task.cancel();
-				});
-				this.tasks = [];
-				this.logs.error('All tasks have been stopped and removed from the tasks list.');
+				this.cancelAllTasks(true);
 				end();
 			}
-			else {
-				const nextExecutionTime = task.timeInterval * 1000;
-				task.nextExecutionTime = nextExecutionTime; // useless actually
-				task.timeout = setTimeout(this.taskLoop.bind(this, task, end), nextExecutionTime);
-				this.logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
-			}
+			else
+				this.scheduleTask(task);
 		});
+	}
+
+	private scheduleTask(task) {
+		const nextExecutionTime = task.timeInterval * 1000;
+		task.nextExecutionTime = nextExecutionTime; // useless actually
+		task.timeout = setTimeout(this.taskLoop.bind(this, task, end), nextExecutionTime);
+		this.logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
+	}
+
+	private cancelAllTasks(isError) {
+		this.tasks.forEach((task) => {
+			task.cancel();
+		});
+		this.tasks = [];
+		(isError ? this.logs.error : this.logs.info)('All tasks have been stopped and removed from the tasks list.');
 	}
 }
