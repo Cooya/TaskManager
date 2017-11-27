@@ -1,9 +1,9 @@
 import * as Logs from '@coya/logs';
 
 export class Task {
-	private _name: string;
-	private _timeInterval: number;
-	private _maxFailuresInARow: number;
+	readonly _name: string;
+	readonly _timeInterval: number;
+	readonly _maxFailuresInARow: number;
 	private _nextExecutionTime: number;
 	private _timeout: number; // only for asynchronous process
 	private _totalExecutions: number;
@@ -74,7 +74,7 @@ export class Task {
 }
 
 export class TaskManager {
-	private _logs: Logs;
+	readonly _logs: Logs;
 	private _end: Function;
 	private _isEnded: boolean;
 	private _tasks: Array<Task>;
@@ -101,7 +101,7 @@ export class TaskManager {
 
 		let timeDiff = this._tasks[0].nextExecutionTime - Date.now();
 		if(timeDiff > 0) {
-			this.logs.info('Waiting ' + timeDiff + ' milliseconds until the next execution...');
+			this._logs.info('Waiting ' + timeDiff + ' milliseconds until the next execution...');
 			setTimeout(this.processSynchronousTasks.bind(this), timeDiff);
 			return;
 		}
@@ -111,10 +111,10 @@ export class TaskManager {
 		.then((result) => {
 			task.incExecutionCounter();
 			if(result && result.stop)
-				this.logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
+				this._logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
 			else if(result && result.stopAll) {
 				this._tasks = [];
-				this.logs.info('All tasks have been stopped and removed from the tasks list.');
+				this._logs.info('All tasks have been stopped and removed from the tasks list.');
 			}
 			else
 				this.reinsertTaskIntoArray(task);
@@ -123,10 +123,10 @@ export class TaskManager {
 		.catch((error) => {
 			task.incExecutionCounter(true);
 			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow)
-				this.logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
+				this._logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
 			else if(error && error.stopAll) {
 				this._tasks = [];
-				this.logs.error('All tasks have been stopped and removed from the tasks list.');
+				this._logs.error('All tasks have been stopped and removed from the tasks list.');
 			}
 			else
 				this.reinsertTaskIntoArray(task);
@@ -151,12 +151,10 @@ export class TaskManager {
 	public processAsynchronousTasks(tasks: Array<Task>) {
 		this._tasks = tasks;
 		if(!this._tasks || this._tasks.length == 0)
-			return Promise.resolve();
+			return this.endTaskManager('No tasks to process.');
 
-		return new Promise(function(resolve, reject) {
-			for(let task of this._tasks)
-				this.taskLoop(task);
-		}.bind(this));
+		for(let task of this._tasks)
+			this.taskLoop(task);
 	}
 
 	private taskLoop(task: Task) {
@@ -165,7 +163,7 @@ export class TaskManager {
 			task.incExecutionCounter();
 			if(result && result.stop) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
-				this.logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
+				this._logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
 				if(!this._tasks.length)
 					this.endTaskManager();
 			}
@@ -178,12 +176,12 @@ export class TaskManager {
 			task.incExecutionCounter(true);
 			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
-				this.logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
+				this._logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
 				if(!this._tasks.length)
-					this.endTaskManager(true);
+					this.endTaskManager('The last task has been stopped and removed from the tasks list.');
 			}
 			else if(error && error.stopAll)
-				this.endTaskManager(true);
+				this.endTaskManager('All tasks have been stopped and removed from the tasks list.');
 			else
 				this.scheduleTask(task);
 		});
@@ -193,18 +191,20 @@ export class TaskManager {
 		const nextExecutionTime = task.timeInterval * 1000;
 		task.nextExecutionTime = nextExecutionTime; // useless actually
 		task.timeout = setTimeout(this.taskLoop.bind(this, task), nextExecutionTime);
-		this.logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
+		this._logs.info('Task "' + task.name + '" : ' + nextExecutionTime + ' milliseconds until the next execution...');
 	}
 
-	private endTaskManager(isError?: boolean) {
-		if(!this._isEnded) { // this allows to not call multiple times the end function if several tasks are running at the same time 
+	private endTaskManager(error?: string) {
+		if(!this._isEnded) { // this boolean allows to not call multiple times the end function if several tasks are running at the same time
+			if(error)
+				this._logs.error(error);
 			this._isEnded = true;
+			this._logs.info('Ending task manager...');
 			if(this._tasks.length) {
 				this._tasks.forEach((task) => {
 					task.cancel();
 				});
 				this._tasks = [];
-				(isError ? this.logs.error: this.logs.info).call(this, 'All tasks have been cancelled and removed from the tasks list.');
 			}
 			if(this._end) this._end();
 		}
