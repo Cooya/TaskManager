@@ -79,8 +79,8 @@ export class TaskManager {
 	private _isEnded: boolean;
 	private _tasks: Array<Task>;
 
-	public constructor() {
-		this._logs = new Logs('task_manager');
+	public constructor(config) {
+		this._logs = new Logs('task_manager', config);
 		this._isEnded = false;
 	}
 
