@@ -7,6 +7,7 @@ const firstTask = new Task('firstTask', 10, function() {
 
 const secondTask = new Task('secondTask', 5, function() {
 	console.log('hola');
+	this.timeInterval = this.timeInterval + 1;
 	return Promise.resolve();
 });
 
@@ -16,7 +17,7 @@ const thirdTask = new Task('thirdTask', 2, function() {
 });
 
 const taskManager = new TaskManager();
-taskManager.end(function() {
+taskManager.end(() => {
 	console.log('All tasks have been stopped, task manager shutted down.');
 });
 taskManager.processAsynchronousTasks([firstTask, secondTask, thirdTask]);

@@ -2,7 +2,7 @@ import * as Logs from '@coya/logs';
 
 export class Task {
 	readonly _name: string;
-	readonly _timeInterval: number;
+	private _timeInterval: number;
 	readonly _maxFailuresInARow: number;
 	private _nextExecutionTime: number;
 	private _timeout: number; // only for asynchronous process
@@ -34,6 +34,10 @@ export class Task {
 
 	get timeInterval() {
 		return this._timeInterval;
+	}
+
+	set timeInterval(timeInterval) {
+		this._timeInterval = timeInterval;
 	}
 
 	get maxFailuresInARow() {
