@@ -17,7 +17,7 @@ const thirdTask = new Task('thirdTask', 2, function() {
 });
 
 const taskManager = new TaskManager();
-taskManager.end(() => {
+taskManager.onEnd(() => {
 	console.log('All tasks have been stopped, task manager shutted down.');
 });
 taskManager.processAsynchronousTasks([firstTask, secondTask, thirdTask]);

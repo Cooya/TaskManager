@@ -79,7 +79,8 @@ export class Task {
 
 export class TaskManager {
 	readonly _logs: Logs;
-	private _end: Function;
+	private _onEnd: Function;
+	private _onTaskEnd: Function;
 	private _isEnded: boolean;
 	private _tasks: Array<Task>;
 
@@ -92,16 +93,22 @@ export class TaskManager {
 		return this._logs;
 	}
 
-	public end(end: Function) {
-		this._end = end;
+	public onEnd(fct: Function) {
+		this._onEnd = fct;
+	}
+
+	public onTaskEnd(fct: Function) {
+		this._onTaskEnd = fct;
 	}
 
 	/*** SYNCHRONOUS SECTION ***/
 
 	public processSynchronousTasks(tasks?: Array<Task>) {
 		if(tasks) this._tasks = tasks;
-		if(!this._tasks.length)
-			return this._end();
+		if(!this._tasks.length) {
+			this._logs.info('Ending task manager...');
+			return this._onEnd ? this._onEnd() : null;
+		}
 
 		let timeDiff = this._tasks[0].nextExecutionTime - Date.now();
 		if(timeDiff > 0) {
@@ -114,8 +121,10 @@ export class TaskManager {
 		return task.run()
 		.then((result) => {
 			task.incExecutionCounter();
-			if(result && result.stop)
+			if(result && result.stop) {
 				this._logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
+				if(this._onTaskEnd) this._onTaskEnd(task);
+			}
 			else if(result && result.stopAll) {
 				this._tasks = [];
 				this._logs.info('All tasks have been stopped and removed from the tasks list.');
@@ -126,8 +135,10 @@ export class TaskManager {
 		})
 		.catch((error) => {
 			task.incExecutionCounter(true);
-			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow)
+			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow) {
 				this._logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
+				if(this._onTaskEnd) this._onTaskEnd(task);
+			}
 			else if(error && error.stopAll) {
 				this._tasks = [];
 				this._logs.error('All tasks have been stopped and removed from the tasks list.');
@@ -168,6 +179,7 @@ export class TaskManager {
 			if(result && result.stop) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
 				this._logs.info('Task "' + task.name + '" stopped and removed from the tasks list.');
+				if(this._onTaskEnd) this._onTaskEnd(task);
 				if(!this._tasks.length)
 					this.endTaskManager();
 			}
@@ -181,6 +193,7 @@ export class TaskManager {
 			if((error && error.stop) || task.failedExecutionsInARow >= task.maxFailuresInARow) {
 				this._tasks.splice(this._tasks.indexOf(task), 1);
 				this._logs.error('Task "' + task.name + '" stopped and removed from the tasks list.');
+				if(this._onTaskEnd) this._onTaskEnd(task);
 				if(!this._tasks.length)
 					this.endTaskManager('The last task has been stopped and removed from the tasks list.');
 			}
@@ -210,7 +223,7 @@ export class TaskManager {
 				});
 				this._tasks = [];
 			}
-			if(this._end) this._end();
+			if(this._onEnd) this._onEnd();
 		}
 	}
 }
