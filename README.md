@@ -36,7 +36,10 @@ const thirdTask = new Task('thirdTask', 2, function() {
 });
 
 const taskManager = new TaskManager();
-taskManager.end(function() {
+taskManager.onTaskEnd(function(task) {
+    console.log('The task "' + task.name + '" has been removed from the task manager.');
+});
+taskManager.onEnd(function() {
     console.log('All tasks have been stopped, task manager shutted down.');
 });
 taskManager.processAsynchronousTasks([firstTask, secondTask, thirdTask]);
