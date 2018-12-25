@@ -1,6 +1,6 @@
 # Task Manager
 
-Scheduler for run tasks successively or simultaneously. 
+Scheduler to run tasks successively or simultaneously. 
 
 ## Installation
 ```
